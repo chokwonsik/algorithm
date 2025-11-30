@@ -14,7 +14,6 @@ def solve1():
     # 기저 상태 (Base cases) 설정
     dp[3] = 1
     dp[5] = 1
-
     # 6kg부터 Nkg까지 차근차근 점화식으로 쌓아 올림
     for i in range(6, N + 1):
         dp[i] = min(dp[i - 3], dp[i - 5]) + 1
@@ -39,6 +38,34 @@ def solve2():
     else:
         # N이 음수가 되어 while문이 정상 종료되면 (break를 만나지 못하면)
         print(-1)
+
+def solve3():
+    # 오민영 설탕 배달
+    n = int(input())
+    dp = [10001 for _ in range(n + 5001)]
+
+    dp[3] = 1
+    dp[5] = 1
+    for i in range(6, n + 1):
+        dp[i] = min(dp[3] + dp[i - 3], dp[5] + dp[i - 5], dp[i - 3] + dp[i - 5])
+
+    if dp[n] >= 10001:
+        print(-1)
+    else:
+        print(dp[n])
+
+def solve4():
+    # 김이한 AI
+    n = int(input())
+    dp = [float('inf')] * (n + 1)
+    dp[0] = 0
+    for sugar in [3, 5]:
+        for i in range(sugar, n + 1):
+            dp[i] = min(dp[i], dp[i - sugar] + 1)
+    if dp[n] == float('inf'):
+        print(-1)
+    else:
+        print(dp[n])
 
 if __name__ == "__main__":
     solve1()
