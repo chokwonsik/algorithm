@@ -1,76 +1,81 @@
 def solve1():
-    """
-    Rolling DP 방식으로 문제를 해결하는 코드.
-    각 행에서 이전 열의 출력값(자기 자신, 위, 아래 중 최댓값)을 이용해 현재 열의 출력값을 구함.
-    저장 값은 (출력값 - 가중치)이며, 이 중 최댓값을 구하는 게 최종 목표.
-    """
-    # 1. 격자의 행(M)과 열(N)을 입력받음.
+    # 1. 격자 크기 입력
     M, N = map(int, input().split())
 
-    # 2. 각 행의 숫자 문자열을 입력받아 한 글자씩 정수로 변환하여 2차원 리스트(격자)를 생성
-    # 예시: "1234" -> [1, 2, 3, 4]
-    grid = [list(map(int, list(input().strip()))) for _ in range(M)]
+    # 2. 파이썬 최적화: list(map())보다 리스트 컴프리헨션이 미세하게 더 빠르고 직관적임
+    grid = [[int(char) for char in input().strip()] for _ in range(M)]
 
-    # 3. 첫 번째 열의 출력값은 입력값(0)에 가중치를 더한 값이므로,
-    # 각 행의 첫 열 출력값은 grid[i][0] 그대로임.
-    prev = [grid[i][0] for i in range(M)]
+    # 3. DP 배열 초기화: '이전 열(j-1)'의 출력값들 (초기값은 첫 열의 가중치)
+    prev_output = [grid[i][0] for i in range(M)]
+    max_storage = 0  # 우리가 찾고자 하는 최종 정답 (최대 저장값)
 
-    # 4. 최대 저장값(출력값 - 가중치)을 저장할 변수 ans 초기화
-    ans = 0
-
-    # 5. 두 번째 열부터 마지막 열까지 반복하며 DP 계산 수행
+    # 4. 시간(j, 열)의 흐름에 따른 시뮬레이션
     for j in range(1, N):
-        # 현재 열의 출력값을 저장할 리스트를 초기화 (행의 개수만큼 0으로 채움)
-        cur = [0] * M
+        curr_output = [0] * M
 
-        # 각 행 i에 대해 처리
+        # 공간(i, 행)의 모든 세포(로봇) 업데이트
         for i in range(M):
-            # 이전 열에서 현재 행(i)의 값, 위 행(i-1)값, 아래 행(i+1)값 중 최댓값을 구함
-            best = prev[i]  # 우선 자기 자신 값을 선택
+            # [입력 단계] 이전 열에서 내게 올 수 있는 3갈래 길 중 가장 큰 눈덩이(저장값) 찾기
+            best_input = prev_output[i]  # 바로 왼쪽
             if i > 0:
-                best = max(best, prev[i - 1])  # 위쪽 행이 있으면 비교
+                best_input = max(best_input, prev_output[i - 1])  # 왼쪽 위
             if i < M - 1:
-                best = max(best, prev[i + 1])  # 아래쪽 행이 있으면 비교
+                best_input = max(best_input, prev_output[i + 1])  # 왼쪽 아래
 
-            # 6. 현재 행(i)의 출력값 = 현재 열 가중치(grid[i][j]) + best
-            cur[i] = best + grid[i][j]
+            # [출력 단계] 내 저장값에 가중치를 더해 다음으로 보낼 눈덩이(출력값) 갱신
+            curr_output[i] = best_input + grid[i][j]
 
-            # 7. 저장값 중 최댓값(ans)을 갱신.
-            ans = max(ans, best)
+            # [정답 갱신] 로봇의 '저장값'들 중 역사상 최고로 큰 값 기록
+            max_storage = max(max_storage, best_input)
 
-        # 8. 다음 열 계산을 위해 현재 열의 결과(cur)를 이전 열 값(prev)로 업데이트
-        prev = cur
+        # 다음 시간을 위해 상태 넘겨주기 (Rolling DP)
+        prev_output = curr_output
 
-    # 9. 최종 최대 저장값을 출력
-    print(ans)
+    print(max_storage)
 
-
-def solve2():
-    # 1. 행(M), 열(N) 입력
-    M, N = map(int, input().split())
-    grid = [list(map(int, list(input().strip()))) for _ in range(M)]
-
-    # 2. dp 테이블 초기화 (M x N)
-    dp = [[0] * N for _ in range(M)]
-    for i in range(M):
-        dp[i][0] = grid[i][0]  # 첫 열은 가중치 그대로
-
-    ans = 0
-    # 3. dp 채우기: 두 번째 열부터
-    for j in range(1, N):
-        for i in range(M):
-            best = dp[i][j - 1]
-            if i > 0:
-                best = max(best, dp[i - 1][j - 1])
-            if i < M - 1:
-                best = max(best, dp[i + 1][j - 1])
-            dp[i][j] = best + grid[i][j]
-            ans = max(ans, best)
-    print(ans)
+def solve2(): #김이한
+    # 계산 로봇
+    n, m = map(int, input().split())
+    l = []
+    for _ in range(n):
+        l.append(list(map(int, input().strip())))
+    ma = 0
+    answer = [[0 for _ in range(m)] for _ in range(n)]
+    for k in range(n):
+        answer[k][0] = l[k][0]
+    for j in range(1, m):
+        for i in range(n):
+            c_ma = 0
+            for a in range(max(0, i - 1), min(n, i + 2)):
+                if answer[a][j - 1] >= c_ma:
+                    c_ma = answer[a][j - 1]
+                answer[i][j] = c_ma + l[i][j]
+            if c_ma >= ma:
+                ma = c_ma
+    print(ma)
 
 
+def solve3(): #오민영
+    # 계산 로봇
+    m, n = map(int, input().split())  # 3 4
+    arr = [[0] * (n + 1)] + [[0] + [int(char) for char in input().strip()] for _ in range(m)]
+    mx = 0
+
+    prev_dp = [0 for _ in range(m + 2)]
+    m_value = 0
+
+    for j in range(1, n + 1):
+        curr_dp = [0 for _ in range(m + 2)]
+        for i in range(1, m + 1):
+            if i == 1:
+                curr_dp[i] = max(prev_dp[i], prev_dp[i + 1])
+            elif i == m:
+                curr_dp[i] = max(prev_dp[i], prev_dp[i - 1])
+            else:
+                curr_dp[i] = max(prev_dp[i], prev_dp[i - 1], prev_dp[i + 1])
+            m_value = max(m_value, curr_dp[i])
+            curr_dp[i] += arr[i][j]
+        prev_dp = curr_dp
+    print(m_value)
 if __name__ == '__main__':
-    #!!!! pypy3로 제출!!!!
-    #solve1()
-    solve2()
-
+    solve1()
