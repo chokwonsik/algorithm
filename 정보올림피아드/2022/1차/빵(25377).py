@@ -10,4 +10,3 @@ if time_l:
     print(min(time_l))
 else:
     print("-1")
-
